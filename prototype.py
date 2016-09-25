@@ -1,11 +1,8 @@
 import string
-from random import shuffle
-from random import randint
-from random import choice
 from random import randrange
-from numpy import multiply
-from numpy import add
-from numpy import subtract
+from numpy import multiply as M
+from numpy import add as A
+from numpy import subtract as S
 from sets import Set
 from copy import deepcopy
 
@@ -16,9 +13,19 @@ EMPTY = 0
 max_execution_time = 100
 
 class Game:
-	def __init__(self, size):
+	def __init__(self, size = 8):
+		print 'Gameboard size is',
+		if size < 5:
+			print 'too small.'
+			return 
+		if size > 16:
+			print 'too big.'
+			return
+		print 'good!'
+
 		self.gbW = size
 		self.gbH = size
+
 		self.clearGameBoard()
 		self.buildPlanes(scale[size])
 
@@ -27,7 +34,7 @@ class Game:
 		print ' '.join(string.uppercase[0:self.gbW])
 		for index, row in enumerate(self.gameBoard):
 			print format(index + 1, '02'),
-			print ' '.join([' ' if cell == EMPTY else str(cell) for cell in row])
+			print ' '.join([' ' if cell == EMPTY else hex(cell)[2:].upper() for cell in row])
 		print ''
 			
 	def clearGameBoard(self):
@@ -42,15 +49,15 @@ class Game:
 
 		parts = Set()
 		parts.add(p) # chest
-		parts.add(tuple(add(p, r))) # head
-		parts.add(tuple(subtract(p, r))) # waist
-		parts.add(tuple(add(p, s))) # two inner wings
-		parts.add(tuple(subtract(p, s))) 
-		parts.add(tuple(subtract(p, multiply(2, r)))) # hip
-		parts.add(tuple(add(p, multiply(2, s)))) # two outter wings
-		parts.add(tuple(subtract(p, multiply(2, s))))
-		parts.add(tuple(subtract(add(p, s), multiply(2, r)))) # two tails
-		parts.add(tuple(subtract(subtract(p, s), multiply(2, r))))
+		parts.add(tuple(A(p, r))) # head
+		parts.add(tuple(S(p, r))) # waist
+		parts.add(tuple(A(p, s))) # two inner wings
+		parts.add(tuple(S(p, s))) 
+		parts.add(tuple(S(p, M(2, r)))) # hip
+		parts.add(tuple(A(p, M(2, s)))) # two outter wings
+		parts.add(tuple(S(p, M(2, s))))
+		parts.add(tuple(S(A(p, s), M(2, r)))) # two tails
+		parts.add(tuple(S(S(p, s), M(2, r))))
 
 		return parts
 
@@ -85,7 +92,6 @@ class Game:
 
 		availableCoord = initAvailableCoord()
 
-		#
 		print "building . .",
 		# always build exactly numOfPlanes 
 		count = 0
