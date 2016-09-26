@@ -1,4 +1,5 @@
 import string
+from re import findall
 from random import randrange
 from numpy import multiply as M
 from numpy import add as A
@@ -118,5 +119,32 @@ class Game:
 			print "<Construction Failed>",
 		print str(count) + "/" + str(numOfPlanes)
 
+	def processInput(self, string):
+		try:
+			row = int(findall(r'\d+', string)[0]) - 1
+			col = ord(findall(r'[a-zA-Z]', string)[0].upper()) - ord('A')
+
+			# check inside gameboard boundary:
+			if row < 0 or row > self.gbH - 1 or col < 0 or col > self.gbW - 1:
+				raise IndexError
+
+			return row, col
+		except (TypeError, IndexError):
+			pass
+
+	def shootAt(self, coord):
+		print not self.gameBoard[coord[0]][coord[1]] == EMPTY
+
+	def startPlay(self):
+		while True:
+			inputString = raw_input('Shoot:')
+			coord = self.processInput(inputString)
+			if bool(coord):
+				self.shootAt(coord)
+			else:
+				print 'Bad shot.'
+				
+
 game = Game(8)
+game.startPlay()
 
