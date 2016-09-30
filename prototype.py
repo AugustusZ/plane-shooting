@@ -9,7 +9,8 @@ from sets import Set
 SCALE = {5:1, 6:2, 7:2, 8:3, 9:4, 10:5, 11:6, 12:8, 13:9, 14:11, 15:13, 16:14}
 EMPTY = 0
 MISSED = -1
-LABELS = {EMPTY:' ', MISSED: 'X'}
+HIT = -2
+LABELS = {EMPTY:'+', MISSED: 'X', HIT: '@'}
 
 
 max_execution_time = 100
@@ -30,12 +31,14 @@ class Game:
 		self.init()
 		self.planes = Set()
 		self.buildPlanes(SCALE[size])
+		self.shotCount = 0
 
 	def printBoard(self, board):
 		horizontalMarker = '   ' + ' '.join(string.uppercase[0:self.gbW])
 		def getVerticalMarker(index):
 			return format(index + 1, '02')
 
+		print ''
 		print horizontalMarker
 		for index, row in enumerate(board):
 			print getVerticalMarker(index),
@@ -56,7 +59,7 @@ class Game:
 		self.planes = Set()
 
 	def generateReport(self, keyword):
-		return '[REPORT] ' + str(len(self.planes)) + (' planes' if len(self.planes) > 1 else ' plane') + ' ' + keyword + '.\n'
+		return '[REPORT] ' + str(len(self.planes)) + (' planes' if len(self.planes) > 1 else ' plane') + ' ' + keyword + '.'
 
 	def buildOnePlane(self, pivot, number):
 		pl = Plane(pivot)
@@ -140,13 +143,14 @@ class Game:
 		for pl in self.planes:
 			if pl.isThisYourHead(coord):
 				for (x, y) in pl.getPartSet():
-					self.reportMap[x][y] = self.airport[x][y]
+					self.reportMap[x][y] = HIT
 					self.airport[x][y] = EMPTY
 					self.gameBoard[x][y] = EMPTY
 				self.planes.discard(pl)
 				break
 
 	def shootAt(self, coord):
+		self.shotCount += 1
 		injury = self.airport[coord[0]][coord[1]]
 		self.reportMap[coord[0]][coord[1]] = injury if injury > 0 else MISSED
 
@@ -155,8 +159,11 @@ class Game:
 
 		return '[REPORT] ' + plane.INJURY_LEVELS[injury] + ' injury on ' + self.convertToCoordString(coord) + '\n' + self.generateReport('left')
 
+	def getHitRate(self):
+		return '{:.0%}'.format(SCALE[self.gbW] * 1.0 / self.shotCount)
+
 	def startPlay(self):
-		print '<Mission Initiated>'
+		print '<Mission Initiated>' 
 		while True:
 			self.printBoard(self.reportMap)
 			inputString = raw_input('Shoot:')
@@ -165,8 +172,11 @@ class Game:
 				print self.shootAt(coord)
 				if not bool(self.planes):
 					 print '<Mission Complete>'
+					 print '[FINAL REPORT] ' + str(self.shotCount) + ' missiles fired. '
+					 print '[FINAL REPORT] ' + 'Hit Rate: ' + self.getHitRate()
+					 break
 			else:
 				print 'Bad shot.'
 
-Game(8).startPlay()
+Game(5).startPlay()
 
