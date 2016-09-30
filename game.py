@@ -6,25 +6,16 @@ from re import findall
 from random import randrange
 from sets import Set
 
-SCALE = {5:1, 6:2, 7:2, 8:3, 9:4, 10:5, 11:6, 12:8, 13:9, 14:11, 15:13, 16:14}
+SCALE = {5:1, 6:1, 7:2, 8:3, 9:4, 10:5, 11:6, 12:8, 13:9, 14:11, 15:13, 16:14}
 EMPTY = 0
 MISSED = -1
 HIT = -2
 LABELS = {EMPTY:'+', MISSED: 'X', HIT: '@'}
 
-
 max_execution_time = 100
 
 class Game:
 	def __init__(self, size = 8):
-		if size < 5:
-			print 'Gameboard size is too small.'
-			return 
-		if size > 16:
-			print 'Gameboard size is too big.'
-			return
-		print ''
-
 		self.gbW = size
 		self.gbH = size
 
@@ -96,7 +87,8 @@ class Game:
 
 		availableCoord = initAvailableCoord()
 
-		print 'Radar scanning . .', # actaully it is builind planes...
+		print '\n===========================\n'
+		print '<Reconnaissance Initiated>\n' # actaully it is builind planes...
 		# always build exactly numOfPlanes 
 		count = 0
 		execution_time = 0
@@ -113,13 +105,12 @@ class Game:
 				if not bool(availableCoord):
 					break
 			execution_time += 1
-			print '.',
-		print ''
+			print 'Reconnoitering...'
 
 		if count == numOfPlanes:
-			print '<Reconnaissance Complete>' # actually it's 'Construction *'
+			print '\n<Reconnaissance Complete>\n' # actually it's 'Construction *'
 		else: 
-			print '<Reconnaissance Failed>' # actually it's 'Construction *'
+			print '\n<Reconnaissance Failed>\n' # actually it's 'Construction *'
 		print self.generateReport('found')
 
 	def processInput(self, inputString):
@@ -163,20 +154,22 @@ class Game:
 		return '{:.0%}'.format(SCALE[self.gbW] * 1.0 / self.shotCount)
 
 	def startPlay(self):
-		print '<Mission Initiated>' 
+		print '\n<Mission Initiated>' 
 		while True:
 			self.printBoard(self.reportMap)
-			inputString = raw_input('Shoot:')
+			inputString = raw_input('Shoot: ')
 			coord = self.processInput(inputString)
 			if bool(coord):
 				print self.shootAt(coord)
 				if not bool(self.planes):
-					 print '<Mission Complete>'
-					 print '[FINAL REPORT] ' + str(self.shotCount) + ' missiles fired. '
-					 print '[FINAL REPORT] ' + 'Hit Rate: ' + self.getHitRate()
-					 break
+					print '<Mission Complete>'
+					print '[FINAL REPORT] ' + str(self.shotCount) + (' missiles' if self.shotCount > 1 else ' missile') + ' fired.'
+					print '[FINAL REPORT] ' + 'Hit Rate: ' + self.getHitRate()
+					print '\n==========================='
+					break
+				print '\n---------------------------'
 			else:
 				print 'Bad shot.'
 
-Game(5).startPlay()
+
 
