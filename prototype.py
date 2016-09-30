@@ -1,14 +1,12 @@
+from plane import Plane
+import plane
+
 import string
 from re import findall
 from random import randrange
-from numpy import multiply as M
-from numpy import add as A
-from numpy import subtract as S
 from sets import Set
-from copy import deepcopy
 
-orientations  = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-scale = {5:1, 6:2, 7:2, 8:3, 9:4, 10:5, 11:6, 12:8, 13:9, 14:11, 15:13, 16:14}
+SCALE = {5:1, 6:2, 7:2, 8:3, 9:4, 10:5, 11:6, 12:8, 13:9, 14:11, 15:13, 16:14}
 EMPTY = 0
 
 max_execution_time = 100
@@ -28,43 +26,32 @@ class Game:
 		self.gbH = size
 
 		self.clearGameBoard()
-		self.buildPlanes(scale[size])
+		self.planes = Set()
+		self.buildPlanes(SCALE[size])
 
-	def printBoard(self):
+	def printBoard(self, board):
 		print '  ',
 		print ' '.join(string.uppercase[0:self.gbW])
-		for index, row in enumerate(self.gameBoard):
+		for index, row in enumerate(board):
 			print format(index + 1, '02'),
 			print ' '.join([' ' if cell == EMPTY else hex(cell)[2:].upper() for cell in row])
 		print ''
-			
+
 	def clearGameBoard(self):
+		# show plane
 		self.gameBoard = [[EMPTY for i in range(self.gbW)] for j in range(self.gbH)]
-
-	# return the shape of the plane as a set of (x,y)
-	def populate(self, c):
-		(o, x, y) = c 
-		r = orientations[o] # o[r]ientation
-		p = (x, y) # [p]osition
-		s = orientations[3 - o] # [s]ide
-
-		parts = Set()
-		parts.add(p) # chest
-		parts.add(tuple(A(p, r))) # head
-		parts.add(tuple(S(p, r))) # waist
-		parts.add(tuple(A(p, s))) # two inner wings
-		parts.add(tuple(S(p, s))) 
-		parts.add(tuple(S(p, M(2, r)))) # hip
-		parts.add(tuple(A(p, M(2, s)))) # two outter wings
-		parts.add(tuple(S(p, M(2, s))))
-		parts.add(tuple(S(A(p, s), M(2, r)))) # two tails
-		parts.add(tuple(S(S(p, s), M(2, r))))
-
-		return parts
+		# show part 
+		self.airport = [[EMPTY for i in range(self.gbW)] for j in range(self.gbH)]
+		self.planes = Set()
 
 	def buildOnePlane(self, pivot, number):
-		for (x, y) in self.populate(pivot):
-			self.gameBoard[x][y] = number
+		pl = Plane(pivot)
+		self.planes.add(pl)
+
+		for (x, y), injury in pl.spec.iteritems():
+			self.airport[x][y] = injury
+			self.gameBoard[x][y] = number + 1
+
 
 	def buildPlanes(self, numOfPlanes):
 		# return an init coord list 
@@ -88,7 +75,7 @@ class Game:
 		# return new coord list without any conflicts with pivot
 		def updateAvailableCoord(availableCoord, pivot):
 			def checkConflict(c1, c2):
-				return bool(self.populate(c1) & self.populate(c2))
+				return Plane.checkCollisionWith(c1, c2)
 			return list(filter(lambda c: not checkConflict(c, pivot), availableCoord))
 
 		availableCoord = initAvailableCoord()
@@ -104,7 +91,7 @@ class Game:
 			while count < numOfPlanes:
 				# randomly pop a pivot from available coordinates
 				pivot = availableCoord.pop(randrange(len(availableCoord)))
-				self.buildOnePlane(pivot, count + 1)
+				self.buildOnePlane(pivot, count)
 				availableCoord = updateAvailableCoord(availableCoord, pivot)
 				count += 1
 				if not bool(availableCoord):
@@ -112,19 +99,20 @@ class Game:
 			execution_time += 1
 			print '.',
 		print ""
-		self.printBoard()
+		self.printBoard(self.gameBoard)
+		self.printBoard(self.airport)
 		if count == numOfPlanes:
 			print "<Construction Complete> (" + str(execution_time) + ")",
 		else: 
 			print "<Construction Failed>",
 		print str(count) + "/" + str(numOfPlanes)
 
-	def processInput(self, string):
+	def processInput(self, inputString):
 		try:
-			row = int(findall(r'\d+', string)[0]) - 1
-			col = ord(findall(r'[a-zA-Z]', string)[0].upper()) - ord('A')
+			row = int(findall(r'\d+', inputString)[0]) - 1
+			col = ord(findall(r'[a-zA-Z]', inputString)[0].upper()) - ord('A')
 
-			# check inside gameboard boundary:
+			# check inside game board boundary:
 			if row < 0 or row > self.gbH - 1 or col < 0 or col > self.gbW - 1:
 				raise IndexError
 
@@ -132,19 +120,38 @@ class Game:
 		except (TypeError, IndexError):
 			pass
 
+	def convertToCoordString(self, coord):
+		(row, col) = coord
+		return '<' + str(row + 1) + ',' + str(string.uppercase[col]) + '>'
+
+	def destroyPlane(self, coord):
+		for pl in self.planes:
+			if pl.isThisYourHead(coord):
+				for (x, y) in pl.getPartSet():
+					self.airport[x][y] = EMPTY
+					self.gameBoard[x][y] = EMPTY
+				self.planes.discard(pl)
+				break
+
 	def shootAt(self, coord):
-		print not self.gameBoard[coord[0]][coord[1]] == EMPTY
+		injury = self.airport[coord[0]][coord[1]]
+
+		if injury == max(plane.INJURY_LEVELS.keys()):
+			self.destroyPlane(coord)
+			print '[REPORT] ' + str(len(self.planes)) + (' planes' if len(self.planes) > 1 else ' plane') + ' left.'
+
+		return plane.INJURY_LEVELS[injury] + ' injury on ' + self.convertToCoordString(coord) + ('' if self.planes else '\nMission Complete!')
 
 	def startPlay(self):
 		while True:
 			inputString = raw_input('Shoot:')
 			coord = self.processInput(inputString)
 			if bool(coord):
-				self.shootAt(coord)
+				print self.shootAt(coord)
+
 			else:
 				print 'Bad shot.'
-				
+			self.printBoard(self.gameBoard)
 
-game = Game(8)
-game.startPlay()
+Game(8).startPlay()
 
