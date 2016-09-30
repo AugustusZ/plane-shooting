@@ -2,9 +2,9 @@
 ## Game Scale
 The built-in relationship between **the size of game board** and **the number of planes** built on it is as follows:
 
-| Size | 16 | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 |
+| Size | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| #Planes | 14 | 13 | 11 | 9 | 8 | 6 | 5 | 4 | 3 | 2 | 2 | 1 |
+| #Planes | 1 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 9 | 11 | 13 | 14 |
 
 ## User Input 
 The simplest way of input is like `1a`, which represents you want to shoot at upper-left corner of the game board. Besides, `processInput()` automatically recognizes coordinates information from players' input with other formats as follows:
