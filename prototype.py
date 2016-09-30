@@ -8,41 +8,55 @@ from sets import Set
 
 SCALE = {5:1, 6:2, 7:2, 8:3, 9:4, 10:5, 11:6, 12:8, 13:9, 14:11, 15:13, 16:14}
 EMPTY = 0
+MISSED = -1
+LABELS = {EMPTY:' ', MISSED: 'X'}
+
 
 max_execution_time = 100
 
 class Game:
 	def __init__(self, size = 8):
-		print 'Gameboard size is',
 		if size < 5:
-			print 'too small.'
+			print 'Gameboard size is too small.'
 			return 
 		if size > 16:
-			print 'too big.'
+			print 'Gameboard size is too big.'
 			return
-		print 'good!'
+		print ''
 
 		self.gbW = size
 		self.gbH = size
 
-		self.clearGameBoard()
+		self.init()
 		self.planes = Set()
 		self.buildPlanes(SCALE[size])
 
 	def printBoard(self, board):
-		print '  ',
-		print ' '.join(string.uppercase[0:self.gbW])
-		for index, row in enumerate(board):
-			print format(index + 1, '02'),
-			print ' '.join([' ' if cell == EMPTY else hex(cell)[2:].upper() for cell in row])
-		print ''
+		horizontalMarker = '   ' + ' '.join(string.uppercase[0:self.gbW])
+		def getVerticalMarker(index):
+			return format(index + 1, '02')
 
-	def clearGameBoard(self):
+		print horizontalMarker
+		for index, row in enumerate(board):
+			print getVerticalMarker(index),
+			print ' '.join([LABELS[cell] if cell < 1 else hex(cell)[2:].upper() for cell in row]),
+			print getVerticalMarker(index)
+		print horizontalMarker
+		print ''
+	
+	def init(self):
+		self.clear()
+		self.reportMap = [[EMPTY for i in range(self.gbW)] for j in range(self.gbH)]
+
+	def clear(self):
 		# show plane
 		self.gameBoard = [[EMPTY for i in range(self.gbW)] for j in range(self.gbH)]
 		# show part 
 		self.airport = [[EMPTY for i in range(self.gbW)] for j in range(self.gbH)]
 		self.planes = Set()
+
+	def generateReport(self, keyword):
+		return '[REPORT] ' + str(len(self.planes)) + (' planes' if len(self.planes) > 1 else ' plane') + ' ' + keyword + '.\n'
 
 	def buildOnePlane(self, pivot, number):
 		pl = Plane(pivot)
@@ -51,7 +65,6 @@ class Game:
 		for (x, y), injury in pl.spec.iteritems():
 			self.airport[x][y] = injury
 			self.gameBoard[x][y] = number + 1
-
 
 	def buildPlanes(self, numOfPlanes):
 		# return an init coord list 
@@ -80,13 +93,13 @@ class Game:
 
 		availableCoord = initAvailableCoord()
 
-		print "building . .",
+		print 'Radar scanning . .', # actaully it is builind planes...
 		# always build exactly numOfPlanes 
 		count = 0
 		execution_time = 0
 		while count < numOfPlanes and execution_time < max_execution_time:
 			count = 0
-			self.clearGameBoard()
+			self.clear()
 			availableCoord = initAvailableCoord()
 			while count < numOfPlanes:
 				# randomly pop a pivot from available coordinates
@@ -98,14 +111,13 @@ class Game:
 					break
 			execution_time += 1
 			print '.',
-		print ""
-		self.printBoard(self.gameBoard)
-		self.printBoard(self.airport)
+		print ''
+
 		if count == numOfPlanes:
-			print "<Construction Complete> (" + str(execution_time) + ")",
+			print '<Reconnaissance Complete>' # actually it's 'Construction *'
 		else: 
-			print "<Construction Failed>",
-		print str(count) + "/" + str(numOfPlanes)
+			print '<Reconnaissance Failed>' # actually it's 'Construction *'
+		print self.generateReport('found')
 
 	def processInput(self, inputString):
 		try:
@@ -128,6 +140,7 @@ class Game:
 		for pl in self.planes:
 			if pl.isThisYourHead(coord):
 				for (x, y) in pl.getPartSet():
+					self.reportMap[x][y] = self.airport[x][y]
 					self.airport[x][y] = EMPTY
 					self.gameBoard[x][y] = EMPTY
 				self.planes.discard(pl)
@@ -135,23 +148,25 @@ class Game:
 
 	def shootAt(self, coord):
 		injury = self.airport[coord[0]][coord[1]]
+		self.reportMap[coord[0]][coord[1]] = injury if injury > 0 else MISSED
 
 		if injury == max(plane.INJURY_LEVELS.keys()):
 			self.destroyPlane(coord)
-			print '[REPORT] ' + str(len(self.planes)) + (' planes' if len(self.planes) > 1 else ' plane') + ' left.'
 
-		return plane.INJURY_LEVELS[injury] + ' injury on ' + self.convertToCoordString(coord) + ('' if self.planes else '\nMission Complete!')
+		return '[REPORT] ' + plane.INJURY_LEVELS[injury] + ' injury on ' + self.convertToCoordString(coord) + '\n' + self.generateReport('left')
 
 	def startPlay(self):
+		print '<Mission Initiated>'
 		while True:
+			self.printBoard(self.reportMap)
 			inputString = raw_input('Shoot:')
 			coord = self.processInput(inputString)
 			if bool(coord):
 				print self.shootAt(coord)
-
+				if not bool(self.planes):
+					 print '<Mission Complete>'
 			else:
 				print 'Bad shot.'
-			self.printBoard(self.gameBoard)
 
 Game(8).startPlay()
 
