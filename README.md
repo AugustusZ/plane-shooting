@@ -24,7 +24,7 @@ A player inputs a pair of coordinates and gets the feedback. The feedback will b
 - ☠️ (3) Fatal injury
 - ‼️ (2) Severe injury
 - ❗️ (1) Minor injury 
-- ❌ (0) Missed
+- ❌ (X) Missed
 
 |  |  | ☠️ |  |  | 
 |:---:|:---:|:---:|:---:|:---:|
