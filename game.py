@@ -1,5 +1,6 @@
 from plane import Plane
 import plane
+from printer import slowprint
 
 import string
 from re import findall
@@ -87,8 +88,10 @@ class Game:
 
 		availableCoord = initAvailableCoord()
 
-		print '\n===========================\n'
-		print '<Reconnaissance Initiated>\n' # actaully it is builind planes...
+		slowprint('\n===============================\n', pausebetweenchar = False)
+		slowprint('<Reconnaissance Initiated>\n')
+		# actaully it is builind planes...
+
 		# always build exactly numOfPlanes 
 		count = 0
 		execution_time = 0
@@ -108,10 +111,12 @@ class Game:
 			print 'Reconnoitering...'
 
 		if count == numOfPlanes:
-			print '\n<Reconnaissance Complete>\n' # actually it's 'Construction *'
+			slowprint('\n<Reconnaissance Complete>\n')
+			# actually it's 'Construction *'
 		else: 
-			print '\n<Reconnaissance Failed>\n' # actually it's 'Construction *'
-		print self.generateReport('found')
+			slowprint('\n<Reconnaissance Failed>\n' )
+			# actually it's 'Construction *'
+		slowprint(self.generateReport('found'))
 
 	def processInput(self, inputString):
 		try:
@@ -154,22 +159,26 @@ class Game:
 		return '{:.0%}'.format(SCALE[self.gbW] * 1.0 / self.shotCount)
 
 	def startPlay(self):
-		print '\n<Mission Initiated>' 
+		slowprint('\n<Mission Initiated>')
 		while True:
 			self.printBoard(self.reportMap)
-			inputString = raw_input('Shoot: ')
+			slowprint('-------------------------------\n', pausebetweenchar = False)
+			slowprint('Shoot:', breakline = False)
+			inputString = raw_input(' ')
 			coord = self.processInput(inputString)
+
 			if bool(coord):
-				print self.shootAt(coord)
+				slowprint('\n' + self.shootAt(coord))
 				if not bool(self.planes):
-					print '<Mission Complete>'
-					print '[FINAL REPORT] ' + str(self.shotCount) + (' missiles' if self.shotCount > 1 else ' missile') + ' fired.'
-					print '[FINAL REPORT] ' + 'Hit Rate: ' + self.getHitRate()
-					print '\n==========================='
+					slowprint()
+					slowprint('<Mission Complete>')
+					slowprint()
+					slowprint('[FINAL REPORT] ' + str(self.shotCount) + (' missiles' if self.shotCount > 1 else ' missile') + ' fired.')
+					slowprint('[FINAL REPORT] ' + 'Hit Rate: ' + self.getHitRate())
+					slowprint('\n===============================', pausebetweenchar = False)
 					break
-				print '\n---------------------------'
 			else:
-				print 'Bad shot.'
+				slowprint('Bad shot.')
 
 
 
