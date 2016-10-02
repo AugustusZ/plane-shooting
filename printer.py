@@ -1,5 +1,7 @@
 from time import sleep
 import sys
+from random import randrange
+import words
 
 def slowprint(string = '', breakline = True, pausebetweenchar = True):
 	sleep(0.15)
@@ -16,4 +18,9 @@ def slowprint(string = '', breakline = True, pausebetweenchar = True):
 	if breakline:
 		print ''
 
+def getGoodJob():
+	return words.GOOD[randrange(len(words.GOOD))]
+
+def printGoodJob():
+	slowprint(getGoodJob())
 

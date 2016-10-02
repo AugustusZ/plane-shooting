@@ -1,6 +1,8 @@
 from plane import Plane
 import plane
 from printer import slowprint
+from printer import getGoodJob
+import stopwatch
 
 import string
 from re import findall
@@ -89,8 +91,6 @@ class Game:
 		availableCoord = initAvailableCoord()
 
 		slowprint('\n===============================\n', pausebetweenchar = False)
-		slowprint('<Reconnaissance Initiated>\n')
-		# actaully it is builind planes...
 
 		# always build exactly numOfPlanes 
 		count = 0
@@ -110,12 +110,8 @@ class Game:
 			execution_time += 1
 			print 'Reconnoitering...'
 
-		if count == numOfPlanes:
-			slowprint('\n<Reconnaissance Complete>\n')
-			# actually it's 'Construction *'
-		else: 
-			slowprint('\n<Reconnaissance Failed>\n' )
-			# actually it's 'Construction *'
+		# count == numOfPlanes: to check if construction is successful
+		slowprint()
 		slowprint(self.generateReport('found'))
 
 	def processInput(self, inputString):
@@ -149,17 +145,19 @@ class Game:
 		self.shotCount += 1
 		injury = self.airport[coord[0]][coord[1]]
 		self.reportMap[coord[0]][coord[1]] = injury if injury > 0 else MISSED
+		remark  = '\n[REMARK] ' + getGoodJob() if injury > 0 else ''
 
 		if injury == max(plane.INJURY_LEVELS.keys()):
 			self.destroyPlane(coord)
 
-		return '[REPORT] ' + plane.INJURY_LEVELS[injury] + ' injury on ' + self.convertToCoordString(coord) + '\n' + self.generateReport('left')
+		return '[REPORT] ' + plane.INJURY_LEVELS[injury] + ' injury on ' + self.convertToCoordString(coord) + '\n' + self.generateReport('left') + remark
 
 	def getHitRate(self):
 		return '{:.0%}'.format(SCALE[self.gbW] * 1.0 / self.shotCount)
 
 	def startPlay(self):
 		slowprint('\n<Mission Initiated>')
+		startLevelTime = stopwatch.now()
 		while True:
 			self.printBoard(self.reportMap)
 			slowprint('-------------------------------\n', pausebetweenchar = False)
@@ -170,11 +168,14 @@ class Game:
 			if bool(coord):
 				slowprint('\n' + self.shootAt(coord))
 				if not bool(self.planes):
+					endLevelTime = stopwatch.now()
 					slowprint()
 					slowprint('<Mission Complete>')
 					slowprint()
-					slowprint('[FINAL REPORT] ' + str(self.shotCount) + (' missiles' if self.shotCount > 1 else ' missile') + ' fired.')
-					slowprint('[FINAL REPORT] ' + 'Hit Rate: ' + self.getHitRate())
+					slowprint('[FINAL REPORT]')
+					slowprint('* Fired Shots: ' + str(self.shotCount))
+					slowprint('* Hit Rate: ' + self.getHitRate())
+					slowprint('* Elapsed Time: ' + stopwatch.diffTime(endLevelTime, startLevelTime))
 					slowprint('\n===============================', pausebetweenchar = False)
 					break
 			else:

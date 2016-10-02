@@ -1,8 +1,8 @@
 from game import Game
 from printer import slowprint
-
-def validateInput():
-	print ''
+from printer import printGoodJob
+import words
+import stopwatch
 
 def processInput(inputString):
 	try:
@@ -32,14 +32,23 @@ def main():
 		level = processInput(inputString)
 		if level:
 			# can play now
-			while level < 13:
+			startGameTime = stopwatch.now()
+			
+			while level < 13: 
 				size  = level + 4
+				
 				Game(size).startPlay()
+				
 				level += 1
-				slowprint('\nCongratulations, Agent K!')
+				slowprint()
+				printGoodJob()
 				slowprint('Now you have Clearance Level ' + str(level))
-			slowprint('\nYou have eliminated all enemies.')
-			slowprint('Great job, Agent K!')
+			
+			endGameTime = stopwatch.now()
+
+			slowprint('\nYou have completed all missions.')
+			slowprint('Total Elapsed Time: ' + stopwatch.diffTime(endGameTime, startGameTime))
+			slowprint('Thank you, Agent K (CL: 13).')
 			slowprint('\n############## END ##############\n')
 			return
 
