@@ -69,4 +69,16 @@ so that `ORIENTATIONS[x]` and `ORIENTATIONS[3 - x]` have the exact opposite orie
 |  | 🎯 |  | |
 
 
+---
+# Run as App
+Open **Automator** and create an **Application** to **Run AppleScript**:
 
+	on run {input, parameters}
+		set currentDir to POSIX path of ((path to me as text) & "::") --get path to parent folder
+		tell application "Terminal"
+			activate
+			do script with command "python " & (quoted form of POSIX path of currentDir) --& "src/"
+		end tell
+	end run
+
+And then save it in the same folder of the `*.py` files.
