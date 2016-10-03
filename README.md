@@ -1,6 +1,6 @@
 # Plane Shooting
 ## Game Scale
-The built-in relationship between **the size of game board** and **the number of planes** built on it is as follows:
+The mapping between **the size of game board** and **the number of planes** in each round of game is as follows:
 
 | Size | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -13,18 +13,20 @@ The simplest way of input is like `1a`, which represents you want to shoot at up
 - leading zero: `01a`
 - UPPERCASED: `1A`
 - separated: `1 a`, `A,01`, etc.
+- wrapped: `(a,1)`, `[A][1]`, `<1,A>`, etc.
 
 ## Game play
 ### Injury Levels
 
 	INJURY_LEVELS = {0: 'No', 1: 'Minor', 2: 'Severe', 3:'Fatal'}
 	
-A player inputs a pair of coordinates and gets the feedback. The feedback will be one of following emojis:
+A player inputs a pair of coordinates and gets the feedback. The feedback will be one of following characters:
 
-- ☠️ (3) Fatal injury
-- ‼️ (2) Severe injury
-- ❗️ (1) Minor injury 
-- ❌ (X) Missed
+- `3`: ☠️ Fatal injury
+- `2`: ‼️ Severe injury
+- `1`: ❗️ Minor injury 
+- `X`: ❌ No injury
+- `@`: 💥 Eliminated
 
 |  |  | ☠️ |  |  | 
 |:---:|:---:|:---:|:---:|:---:|
