@@ -1,4 +1,15 @@
 # Plane Shooting
+
+> For Michael 🎂 Made by ❤️
+
+## How to Run the Game
+In Terminal, 
+
+	cd /path/to/repo/
+	python .
+
+Then you choose a **Clearance Level** AKA **the size of game board** to start from. After that, all you need to do is to guess where the planes are and shoot them down!
+
 ## Game Scale
 The mapping between **the size of game board** and **the number of planes** in each round of game is as follows:
 
@@ -84,3 +95,5 @@ Open **Automator** and create an **Application** to **Run AppleScript**:
 	end run
 
 And then save it in the same folder of the `*.py` files.
+
+
