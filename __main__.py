@@ -14,7 +14,7 @@ def processInput(inputString):
 			slowprint('Now you have Clearance Level 1, the lowest level.')
 			return 1
 		if size > 12:
-			slowprint("Don't overestimate yourself, Agent K.")
+			slowprint("Don't overestimate yourself, Michael.")
 			slowprint('Now you have Clearance Level 12, the highest level an agent can get.')
 			return 12
 
@@ -24,7 +24,7 @@ def processInput(inputString):
 		return None
 
 def main():
-	slowprint('Nice to meet you, Agent K!')
+	slowprint('Nice to meet you, Michael!')
 
 	while True:
 		slowprint('Enter your Clearance Level (1 - 12):', breakline = False)
@@ -48,7 +48,7 @@ def main():
 
 			slowprint('\nYou have completed all missions.')
 			slowprint('Total Elapsed Time: ' + stopwatch.diffTime(endGameTime, startGameTime))
-			slowprint('Thank you, Agent K (CL: 13).')
+			slowprint('Thank you, Michael (CL: 13).')
 			slowprint('\n############## END ##############\n')
 			return
 
